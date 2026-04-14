@@ -1,0 +1,75 @@
+{
+    "interactionModel": {
+        "languageModel": {
+            "invocationName": "minha casa",
+            "intents": [
+                {
+                    "name": "AMAZON.NoIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.CancelIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.HelpIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.StopIntent",
+                    "samples": []
+                },
+                {
+                    "name": "AMAZON.NavigateHomeIntent",
+                    "samples": []
+                },
+                {
+                    "name": "ConversationIntent",
+                    "slots": [
+                        {
+                            "name": "text",
+                            "type": "TextoLivre"
+                        }
+                    ],
+                    "samples": [
+                        "{text}",
+                        "ação {text}",
+                        "comando {text}"
+                    ]
+                }
+            ],
+            "types": [
+                {
+                    "name": "TextoLivre",
+                    "values": [
+                        {
+                            "name": {
+                                "value": "ligar a luz"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "qual o status da casa"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "desligar a tv"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "bom dia"
+                            }
+                        },
+                        {
+                            "name": {
+                                "value": "abrir portão"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
