@@ -10,27 +10,27 @@ Ponte inteligente e assíncrona entre a Amazon Alexa, o Home Assistant (HA) e um
 Voz → Alexa → AWS API Gateway → AWS Lambda → Home Assistant → LM Studio → TTS (Alexa Media Player)
 ```
 
-| # | Etapa | Detalhe |
-|---|---|---|
-| 1 | **Gatilho (Voz)** | Usuário fala o comando para a Alexa. |
-| 2 | **API Gateway** | Recebe a requisição da Skill e roteia para a Lambda correta. |
-| 3 | **Lambda Bridge** | Envia o payload ao HA via Webhook e aguarda até 15s pela resposta. |
-| 4 | **Home Assistant** | Recebe o webhook e aciona o LLM local via `Extended OpenAI Conversation`. |
-| 5 | **LM Studio** | Interpreta a intenção, monta a Tool Call e executa o serviço no HA. |
-| 6 | **TTS Assíncrono** | O HA usa o `Alexa Media Player` para fazer o Echo falar a resposta. |
+| #   | Etapa              | Detalhe                                                                   |
+| --- | ------------------ | ------------------------------------------------------------------------- |
+| 1   | **Gatilho (Voz)**  | Usuário fala o comando para a Alexa.                                      |
+| 2   | **API Gateway**    | Recebe a requisição da Skill e roteia para a Lambda correta.              |
+| 3   | **Lambda Bridge**  | Envia o payload ao HA via Webhook e aguarda até 15s pela resposta.        |
+| 4   | **Home Assistant** | Recebe o webhook e aciona o LLM local via `Extended OpenAI Conversation`. |
+| 5   | **LM Studio**      | Interpreta a intenção, monta a Tool Call e executa o serviço no HA.       |
+| 6   | **TTS Assíncrono** | O HA usa o `Alexa Media Player` para fazer o Echo falar a resposta.       |
 
 ---
 
 ## 🛠️ Pré-requisitos
 
-* **Home Assistant** exposto para a internet (Cloudflare Tunnel ou DuckDNS).
-* **LM Studio** rodando localmente na mesma rede do HA.
-* Conta **AWS** ativa (IAM, Lambda, DynamoDB, API Gateway).
-* Conta **Alexa Developer Console** com uma Custom Skill criada.
-* Integrações instaladas no HA via HACS:
-  * `Extended OpenAI Conversation` — conecta ao LM Studio.
-  * `Alexa Media Player` — retorno assíncrono de voz.
-* **Helper:** `input_text` criado no HA com o nome exato `jarvis_response`.
+- **Home Assistant** exposto para a internet (Cloudflare Tunnel ou DuckDNS).
+- **LM Studio** rodando localmente na mesma rede do HA.
+- Conta **AWS** ativa (IAM, Lambda, DynamoDB, API Gateway).
+- Conta **Alexa Developer Console** com uma Custom Skill criada.
+- Integrações instaladas no HA via HACS:
+  - `Extended OpenAI Conversation` — conecta ao LM Studio.
+  - `Alexa Media Player` — retorno assíncrono de voz.
+- **Helper:** `input_text` criado no HA com o nome exato `jarvis_response`.
 
 ---
 
@@ -48,13 +48,13 @@ Esta é a espinha dorsal do projeto. Configure os serviços na ordem abaixo.
 2. Selecione **Acesso programático** para gerar as chaves.
 3. Anexe diretamente as 5 políticas abaixo ao usuário:
 
-| Política | Finalidade |
-|---|---|
-| `AmazonDynamoDBFullAccess` | Leitura/escrita das tabelas de tokens. |
-| `AmazonS3FullAccess` | Dependência interna do framework. |
-| `AWSCloudFormationFullAccess` | Deploy via SAM/CloudFormation (opcional). |
-| `AWSLambda_FullAccess` | Deploy e gerenciamento das funções Lambda. |
-| `IAMFullAccess` | Criação de roles para as próprias funções Lambda. |
+| Política                      | Finalidade                                        |
+| ----------------------------- | ------------------------------------------------- |
+| `AmazonDynamoDBFullAccess`    | Leitura/escrita das tabelas de tokens.            |
+| `AmazonS3FullAccess`          | Dependência interna do framework.                 |
+| `AWSCloudFormationFullAccess` | Deploy via SAM/CloudFormation (opcional).         |
+| `AWSLambda_FullAccess`        | Deploy e gerenciamento das funções Lambda.        |
+| `IAMFullAccess`               | Criação de roles para as próprias funções Lambda. |
 
 4. Ao finalizar, **salve as chaves de acesso (Access Key ID e Secret Access Key)** — elas só aparecem uma vez.
 
@@ -62,10 +62,10 @@ Esta é a espinha dorsal do projeto. Configure os serviços na ordem abaixo.
 
 Crie duas tabelas no console **DynamoDB → Tabelas → Criar tabela**:
 
-| Tabela | Chave Primária | Tipo | Função |
-|---|---|---|---|
-| `jarvis_oauth_tokens` | `access_token` | String | **Principal** — armazena os tokens de Account Linking. |
-| `alexa_jarvis_sessions` | `session_id` | String | Auxiliar — controle de sessão (opcional). |
+| Tabela                  | Chave Primária | Tipo   | Função                                                 |
+| ----------------------- | -------------- | ------ | ------------------------------------------------------ |
+| `jarvis_oauth_tokens`   | `access_token` | String | **Principal** — armazena os tokens de Account Linking. |
+| `alexa_jarvis_sessions` | `session_id`   | String | Auxiliar — controle de sessão (opcional).              |
 
 > ⚠️ **Crítico:** O nome `jarvis_oauth_tokens` e o campo `access_token` são hardcoded no script `alexa-jarvis-bridge`. Não altere.
 
@@ -81,10 +81,10 @@ Responsável pelo fluxo de **Account Linking** (OAuth 2.0 entre a Skill e o HA).
 2. Cole o código do arquivo `jarvis-oauth-handler.py` do repositório.
 3. Em **Configuration → Environment variables**, adicione:
 
-| Variável | Valor |
-|---|---|
-| `CLIENT_ID` | ID de cliente definido por você (ex: `jarvis-client-123`). |
-| `CLIENT_SECRET` | Secret definido por você (string aleatória e segura). |
+| Variável        | Valor                                                      |
+| --------------- | ---------------------------------------------------------- |
+| `CLIENT_ID`     | ID de cliente definido por você (ex: `jarvis-client-123`). |
+| `CLIENT_SECRET` | Secret definido por você (string aleatória e segura).      |
 
 ##### Lambda 2: `alexa-jarvis-bridge`
 
@@ -100,11 +100,11 @@ Responsável pela **ponte de comandos** entre a Alexa e o Home Assistant.
 1. Acesse **API Gateway → Create API → REST API** (ex: `jarvis-registration-api`).
 2. Crie os seguintes Resources e Methods:
 
-| Resource | Methods | Observação |
-|---|---|---|
-| `/oauth/authorize` | `POST`, `OPTIONS` | Inicia o fluxo de autorização OAuth. |
-| `/oauth/exchange` | `POST`, `OPTIONS` | Troca o authorization code pelo access token. |
-| `/register` | `POST`, `OPTIONS` | Registra o usuário e salva credenciais no DynamoDB. |
+| Resource           | Methods           | Observação                                          |
+| ------------------ | ----------------- | --------------------------------------------------- |
+| `/oauth/authorize` | `POST`, `OPTIONS` | Inicia o fluxo de autorização OAuth.                |
+| `/oauth/exchange`  | `POST`, `OPTIONS` | Troca o authorization code pelo access token.       |
+| `/register`        | `POST`, `OPTIONS` | Registra o usuário e salva credenciais no DynamoDB. |
 
 3. Para cada rota, integre o Method `POST` à Lambda `jarvis-oauth-handler`.
 4. **Habilite o CORS** em cada Resource (o método `OPTIONS` é obrigatório para o navegador do Account Linking não bloquear a chamada).
@@ -125,9 +125,9 @@ Para conectar a conta do usuário ao Home Assistant, abra o arquivo `oauth.html`
 1. No editor de JSON da Skill, importe o arquivo `intents` do repositório — ele contém todas as intents já configuradas.
 2. Certifique-se de que os dois itens abaixo estão presentes:
 
-| Intent | Descrição |
-|---|---|
-| `AMAZON.NoIntent` | **Crucial** para capturar a saída limpa da sessão sem gerar erro de intent não tratado. |
+| Intent               | Descrição                                                                                                 |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| `AMAZON.NoIntent`    | **Crucial** para capturar a saída limpa da sessão sem gerar erro de intent não tratado.                   |
 | `ConversationIntent` | Intent principal com o slot `{text}` do tipo customizado `TextoLivre` — captura qualquer fala do usuário. |
 
 3. Salve e **Build** o modelo.
@@ -140,9 +140,9 @@ Para conectar a conta do usuário ao Home Assistant, abra o arquivo `oauth.html`
 
 Crie o helper de estado que serve de "caixa postal" entre o LLM e a Lambda:
 
-* **Configurações → Dispositivos e Serviços → Helpers → Criar → Texto**
-* Nome: `jarvis_response`
-* O `entity_id` resultante deve ser exatamente `input_text.jarvis_response`.
+- **Configurações → Dispositivos e Serviços → Helpers → Criar → Texto**
+- Nome: `jarvis_response`
+- O `entity_id` resultante deve ser exatamente `input_text.jarvis_response`.
 
 #### 3.2 — Integração Extended OpenAI Conversation
 
@@ -186,12 +186,12 @@ Para automação residencial confiável (Tool Calling consistente), o modelo pre
 
 A arquitetura antiga e a pouca VRAM exigem ajuste no motor (`llama.cpp`) para evitar o erro `GGML_ASSERT`. No painel de **Inference** do LM Studio, configure:
 
-| Parâmetro | Valor | Motivo |
-|---|---|---|
-| Context Length | `2048` | Evita sobrecarga na memória |
-| CPU Threads | `4` | Máximo de núcleos físicos reais (i7-6700HQ) |
-| GPU Offload | `13` | Limite seguro para 3GB de VRAM neste modelo |
-| KV Cache | `Unified` | Padrão |
+| Parâmetro      | Valor     | Motivo                                      |
+| -------------- | --------- | ------------------------------------------- |
+| Context Length | `2048`    | Evita sobrecarga na memória                 |
+| CPU Threads    | `4`       | Máximo de núcleos físicos reais (i7-6700HQ) |
+| GPU Offload    | `13`      | Limite seguro para 3GB de VRAM neste modelo |
+| KV Cache       | `Unified` | Padrão                                      |
 
 ---
 
@@ -214,27 +214,26 @@ A partir daí, falar "Ligar minha casa" interceptará o comando nativo da Amazon
 
 ## 📁 Arquivos do Repositório
 
-| Arquivo | Descrição |
-|---|---|
-| `alexa-jarvis-bridg.py` | Código Python da Lambda principal (ponte Alexa → HA). |
-| `jarvis-oauth-handler.py` | Código Python da Lambda de Account Linking (OAuth). |
-| `automation.yaml` | YAML da automação do Home Assistant (Webhook + TTS). |
-| `intents` | JSON do Interaction Model da Alexa Skill (importe no console). |
-| `prompt.txt` | System Prompt completo com as Immutable Laws (cole no Extended OpenAI Conversation). |
-| `oauth.html` | Interface web para registrar as credenciais do HA na API Gateway. |
-| `index.html` | Alternativa local ao `oauth.html` para o fluxo de registro. |
-| `configs.txt` | Referência de configurações e variáveis de ambiente. |
+| Arquivo                   | Descrição                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `alexa-jarvis-bridg.py`   | Código Python da Lambda principal (ponte Alexa → HA).                                |
+| `jarvis-oauth-handler.py` | Código Python da Lambda de Account Linking (OAuth).                                  |
+| `automation.yaml`         | YAML da automação do Home Assistant (Webhook + TTS).                                 |
+| `intents`                 | JSON do Interaction Model da Alexa Skill (importe no console).                       |
+| `prompt.txt`              | System Prompt completo com as Immutable Laws (cole no Extended OpenAI Conversation). |
+| `oauth.html`              | Interface web para registrar as credenciais do HA na API Gateway.                    |
+| `privacy.html`            | Política de Privacidade da Skill.                                                    |
+| `terms.html`              | Termos de Uso da Skill.                                                              |
 
 ---
 
 ## 🐛 Troubleshooting
 
-| Sintoma | Causa Provável | Solução |
-|---|---|---|
-| "Um problema ocorreu com a resposta da Skill" | Lambda estourou o timeout | Aumente o timeout da Lambda para 15s. Verifique se `input_text.jarvis_response` existe no HA. |
-| IA diz que executou, mas nada acontece | IA respondeu com texto ao invés de Tool Call | Use a `IMMUTABLE LAW 0` no System Prompt. Modelos Q3 ou <3B perdem capacidade de gerar JSONs corretos. |
-| IA demora mais de 1 minuto | Hardware atingiu o limite (~3 t/s) | Reduza a complexidade dos comandos ("Ligar luz TV" ao invés de "Ligar tudo"). |
-| Erro `GGML_ASSERT` no log | GPU Offload além do limite da placa | Reduza o valor gradativamente (ex: 15 → 13). |
-| IA alucina comandos ao pedir status | `tool_choice: required` forçando Tool Call | Altere para `tool_choice: "auto"` em `conversation.py`. |
-| Vinculação de conta falha | CORS bloqueando a chamada do navegador | Certifique-se de que o método `OPTIONS` está habilitado em todas as rotas do API Gateway. |
-| Token "not found" no DynamoDB | Tabela com nome errado ou chave primária diferente | Confirme que a tabela é `jarvis_oauth_tokens` com chave `access_token` (String). |
+| Sintoma                                       | Causa Provável                                     | Solução                                                                                                |
+| --------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| "Um problema ocorreu com a resposta da Skill" | Lambda estourou o timeout                          | Aumente o timeout da Lambda para 15s. Verifique se `input_text.jarvis_response` existe no HA.          |
+| IA diz que executou, mas nada acontece        | IA respondeu com texto ao invés de Tool Call       | Use a `IMMUTABLE LAW 0` no System Prompt. Modelos Q3 ou <3B perdem capacidade de gerar JSONs corretos. |
+| IA demora mais de 1 minuto                    | Hardware atingiu o limite (~3 t/s)                 | Reduza a complexidade dos comandos ("Ligar luz TV" ao invés de "Ligar tudo").                          |
+| Erro `GGML_ASSERT` no log                     | GPU Offload além do limite da placa                | Reduza o valor gradativamente (ex: 15 → 13).                                                           |
+| Vinculação de conta falha                     | CORS bloqueando a chamada do navegador             | Certifique-se de que o método `OPTIONS` está habilitado em todas as rotas do API Gateway.              |
+| Token "not found" no DynamoDB                 | Tabela com nome errado ou chave primária diferente | Confirme que a tabela é `jarvis_oauth_tokens` com chave `access_token` (String).                       |

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade - Jarvis Home</title>
+    <link rel="icon" href="https://raw.githubusercontent.com/self-labs/jarvis-home/refs/heads/master/assets/favicon.ico" type="image/x-icon"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+    </style>
+</head>
+<body class="bg-slate-900 flex items-center justify-center min-h-screen p-4">
+
+    <div class="container bg-white w-full max-w-2xl mx-auto p-6 sm:p-8 rounded-2xl shadow-lg shadow-emerald-500/20">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-slate-800">🛡️ Política de Privacidade</h1>
+            <p class="text-slate-500 mt-2">Jarvis Home by Self-Labs</p>
+        </div>
+
+        <div class="text-slate-600 space-y-6 leading-relaxed">
+            <p>A <strong class="text-slate-800">Self-Labs</strong> respeita sua privacidade. Esta política descreve como a skill "Jarvis Home" lida com seus dados.</p>
+            
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">1. Dados Coletados</h2>
+                <p class="mb-2">Para conectar a Alexa à sua casa inteligente, coletamos estritamente os dados necessários no momento da vinculação de conta (Account Linking):</p>
+                <ul class="list-disc list-inside space-y-1 ml-2 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <li>Endereço de E-mail.</li>
+                    <li>URL de acesso remoto do seu Home Assistant.</li>
+                    <li>Token de Acesso de Longa Duração (Long-Lived Access Token).</li>
+                </ul>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">2. Uso dos Dados</h2>
+                <p>Os dados fornecidos são armazenados de forma segura em nossa infraestrutura na nuvem (AWS DynamoDB) com o único propósito de rotear seus comandos de voz da Amazon Alexa para a sua instância privada do Home Assistant. Não vendemos, compartilhamos ou utilizamos seus dados para publicidade.</p>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 mb-2">3. Exclusão de Dados</h2>
+                <p>Ao desativar a Skill no aplicativo da Alexa, a permissão é revogada. Para solicitar a exclusão definitiva dos seus dados de conexão do nosso banco de dados, entre em contato com o suporte da Self-Labs.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
