@@ -37,7 +37,7 @@ actions:
 
           - action: conversation.process
             data:
-              agent_id: conversation.extended_openai_conversation # COLOQUE SEU AGENT_ID AQUI
+              agent_id: conversation.jarvis # COLOQUE SEU AGENT_ID AQUI
               text: "{{ trigger.json.request.intent.slots.text.value }}"
             response_variable: jarvis_response
 
@@ -48,11 +48,11 @@ actions:
               value: "{{ jarvis_response.response.speech.plain.speech }}"
 
           # Retorno de voz assíncrono pela Alexa
-          - action: notify.alexa_media_echo_dot_de_gustavo # COLOQUE O NOME DO SEU MEDIA PLAYER AQUI
-            data:
-              message: "{{ jarvis_response.response.speech.plain.speech }}"
-              data:
-                type: tts
+          #- action: notify.alexa_media_echo_dot_de_gustavo # COLOQUE O NOME DO SEU MEDIA PLAYER AQUI
+          #  data:
+          #    message: "{{ jarvis_response.response.speech.plain.speech }}"
+          #    data:
+          #      type: tts
 
       # --- Encerramento ---
       - conditions:

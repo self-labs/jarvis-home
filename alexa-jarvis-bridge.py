@@ -26,6 +26,32 @@ def get_user_config_from_token(access_token):
         print(f"Erro ao buscar configuração do token no DynamoDB: {e}")
         return None
 
+def send_progressive_response(event, text="Processando..."):
+    """Injeta áudio na Alexa enquanto a Lambda continua rodando no fundo."""
+    try:
+        api_access_token = event['context']['System'].get('apiAccessToken')
+        api_endpoint = event['context']['System'].get('apiEndpoint')
+        request_id = event['request']['requestId']
+        
+        if not api_access_token or not api_endpoint:
+            return
+            
+        url = f"{api_endpoint}/v1/directives"
+        headers = {
+            "Authorization": f"Bearer {api_access_token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "header": {"requestId": request_id},
+            "directive": {
+                "type": "VoicePlayer.Speak",
+                "speech": text
+            }
+        }
+        requests.post(url, headers=headers, json=payload, timeout=2)
+    except Exception as e:
+        print(f"Erro no Progressive Response: {e}")
+
 def call_home_assistant_async(ha_url, ha_token, event):
     """Envia o evento via Webhook, aguarda o LM Studio, e busca a resposta (Bypass Cloudflare)."""
     try:
@@ -43,16 +69,31 @@ def call_home_assistant_async(ha_url, ha_token, event):
         post_response = requests.post(webhook_url, json=event, headers=headers, timeout=5, verify=False)
         post_response.raise_for_status()
 
-        # 2. Aguarda LLM processar no seu Servidor
-        time.sleep(7) 
+        # 2. Mini-pausa de 200ms só para o HA virar o status para "Processando..."
+        time.sleep(0.2)
 
-        # 3. Pesca a resposta no buffer do HA
+        # 3. Pesca Inteligente Limitada (Escape Hatch de 6 segundos)
         state_url = f"{ha_url}/api/states/input_text.jarvis_response"
-        get_response = requests.get(state_url, headers=headers, timeout=5, verify=False)
-        get_response.raise_for_status()
-
-        state_data = get_response.json()
-        return state_data.get('state', "O assistente processou o comando, mas não enviou texto de retorno.")
+        
+        for _ in range(20): # 20 ciclos de 0.3s = 6 segundos. Limite seguro antes da Alexa cortar.
+            get_response = requests.get(state_url, headers=headers, timeout=5, verify=False)
+            if get_response.status_code == 200:
+                current_state = get_response.json().get('state', '')
+                
+                # Achou a resposta final da IA antes do tempo estourar!
+                if current_state not in ["Processando...", "Jarvis ativado. O que deseja?", ""]:
+                    
+                    # Limpa o campo no HA para não sujar a próxima rodada
+                    clear_url = f"{ha_url}/api/services/input_text/set_value"
+                    requests.post(clear_url, headers=headers, json={"entity_id": "input_text.jarvis_response", "value": ""}, verify=False)
+                    
+                    return current_state
+            
+            time.sleep(0.3)
+                    
+        # 4. Escape Hatch!
+        # Se a IA (Tool Call) demorou mais de 6 segundos, saímos para não travar a Alexa.
+        return "Comando em andamento."
 
     except requests.exceptions.RequestException as e:
         print("!!!!!!!!!! ERRO DE COMUNICAÇÃO !!!!!!!!!!")
@@ -133,12 +174,19 @@ def lambda_handler(event, context):
         if spoken_text in ['não', 'nao', 'nada', 'encerrar', 'nenhum', 'sair']:
             return build_response("Até logo.", True)
 
+        # Manda a Alexa falar "Processando..." IMEDIATAMENTE (Progressive Response)
+        send_progressive_response(event, "Processando...")
+
         # Se não for palavra de saída, envia para a IA
         ha_response_text = call_home_assistant_async(
             user_config['ha_url'],
             user_config['ha_token'],
             event
         )
-        return build_response(ha_response_text, False, "Mais alguma coisa?")
+        
+        # Gruda a pergunta na fala principal para acabar com o silêncio
+        fala_completa = f"{ha_response_text} Mais alguma coisa?"
+        
+        return build_response(fala_completa, False, "Estou ouvindo. Pode falar.")
 
     return build_response("Comando não reconhecido.", False)
